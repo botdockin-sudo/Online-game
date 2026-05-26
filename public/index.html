@@ -3,97 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Strategy Line Pro | Voice & Battle</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <title>Strategy Line Battle Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Black+Ops+One&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --primary: #3b82f6;
-            --p1: #10b981;
-            --p2: #ef4444;
-            --gold: #f59e0b;
+            --bg: #050a14;
+            --primary: #0084ff;
+            --victory: #ffcc00;
+            --defeat: #ff3131;
+            --p1: #00ff88;
+            --p2: #ff3131;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', sans-serif; }
         body { background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
-        .container { width: 95%; max-width: 420px; background: var(--card); border-radius: 32px; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); position: relative; border: 1px solid rgba(255,255,255,0.05); }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; margin-bottom: 25px; color: var(--primary); text-align: center; letter-spacing: 2px; }
+        .app-container { width: 95%; max-width: 420px; background: rgba(10, 20, 35, 0.95); border-radius: 40px; padding: 25px; border: 2px solid #1a2a40; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
 
         .hidden { display: none !important; }
-        .section { animation: zoomIn 0.3s ease-out; }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        /* Menu */
-        .btn { padding: 18px; border-radius: 16px; border: none; font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 15px; text-transform: uppercase; }
-        .btn-create { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-        .btn-join { background: #1e293b; color: white; border: 1px solid var(--primary); }
-
-        /* ID UI */
-        .id-box { background: #020617; padding: 20px; border-radius: 16px; border: 2px dashed #334155; margin: 20px 0; position: relative; }
-        .id-text { font-family: monospace; font-size: 14px; color: var(--primary); word-break: break-all; }
-        input { width: 100%; padding: 18px; border-radius: 16px; border: 1px solid #334155; background: #020617; color: white; font-size: 16px; margin-bottom: 15px; text-align: center; outline: none; }
-
-        /* Game UI */
-        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .status-pill { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 900; letter-spacing: 1px; }
+        /* Free Fire Style Mic */
+        .mic-container { position: relative; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; }
+        .mic-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #1e293b; color: white; cursor: pointer; z-index: 2; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        .mic-btn.active { background: var(--p1); box-shadow: 0 0 15px var(--p1); }
+        .mic-btn.muted { background: var(--defeat); }
         
-        .mic-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #1e293b; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .mic-btn.active { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
-        .mic-btn.muted { background: var(--p2); }
+        /* Mic Visualizer Waves */
+        .visualizer { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--p1); opacity: 0; }
+        .speaking .visualizer { animation: ripple 1.2s infinite; opacity: 1; }
+        @keyframes ripple { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.8); opacity: 0; } }
 
-        .board-svg { width: 100%; background: #020617; border-radius: 24px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        .line { stroke: #1e293b; stroke-width: 4; stroke-linecap: round; }
-        .node { fill: #0f172a; stroke: #334155; stroke-width: 2; cursor: pointer; transition: 0.3s; }
-        .p1 { fill: var(--p1) !important; stroke: #fff !important; filter: drop-shadow(0 0 8px var(--p1)); }
-        .p2 { fill: var(--p2) !important; stroke: #fff !important; filter: drop-shadow(0 0 8px var(--p2)); }
-        .selected { stroke: var(--gold) !important; stroke-width: 5; r: 18; }
-        .hint { fill: var(--primary); opacity: 0.4; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { r: 6; } 50% { r: 10; } }
+        /* Buttons & Inputs */
+        .btn { padding: 18px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; margin-bottom: 15px; text-transform: uppercase; font-size: 16px; transition: 0.2s; }
+        .btn-main { background: linear-gradient(135deg, #0084ff, #00c2ff); color: white; box-shadow: 0 5px 15px rgba(0, 132, 255, 0.4); }
+        input { width: 100%; padding: 18px; border-radius: 12px; border: 1px solid #2a3a50; background: #050a14; color: white; text-align: center; margin-bottom: 15px; font-weight: bold; }
 
-        /* Result Overlay */
-        #result-overlay { position: absolute; inset: 0; background: rgba(2, 6, 23, 0.9); border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
-        .result-title { font-family: 'Orbitron', sans-serif; font-size: 32px; margin-bottom: 10px; }
-        .result-msg { font-size: 16px; opacity: 0.7; margin-bottom: 30px; }
+        /* Board Styling */
+        .board-svg { width: 100%; background: #050a14; border-radius: 30px; border: 4px solid #1a2a40; padding: 10px; }
+        .line { stroke: #1a2a40; stroke-width: 5; stroke-linecap: round; }
+        .node { fill: #0f172a; stroke: #2a3a50; stroke-width: 3; cursor: pointer; transition: 0.3s; }
+        .p1 { fill: var(--p1) !important; stroke: #fff !important; filter: drop-shadow(0 0 10px var(--p1)); }
+        .p2 { fill: var(--p2) !important; stroke: #fff !important; filter: drop-shadow(0 0 10px var(--p2)); }
+        .selected { stroke: var(--victory) !important; stroke-width: 6; r: 18; }
+
+        /* Winner/Loser Overlay */
+        #result-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 40px; animation: overlayIn 0.5s forwards;
+        }
+        @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .result-banner { font-family: 'Black Ops One', cursive; font-size: 60px; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .victory-text { color: var(--victory); animation: victoryJump 0.5s ease-in-out infinite alternate; }
+        .defeat-text { color: var(--defeat); animation: shake 0.2s infinite; }
+
+        @keyframes victoryJump { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .status-pill { background: #1a2a40; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 14px; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 id="app-title">STRATEGY LINE</h1>
+<div class="app-container">
+    <h1 style="text-align:center; color:var(--primary); margin-bottom:20px; font-size:18px;">STRATEGY BATTLE</h1>
 
-    <!-- MENU -->
-    <div id="menu-screen" class="section">
-        <button class="btn btn-create" onclick="showCreate()">CREATE ROOM</button>
-        <button class="btn btn-join" onclick="showJoin()">JOIN ROOM</button>
+    <!-- Menu -->
+    <div id="menu-screen">
+        <button class="btn btn-main" onclick="showCreate()">CREATE BATTLE</button>
+        <button class="btn" style="background:#1a2a40; color:white;" onclick="showJoin()">JOIN BATTLE</button>
     </div>
 
-    <!-- CREATE SCREEN -->
-    <div id="create-screen" class="section hidden">
-        <p style="opacity: 0.6; font-size: 14px;">SHARE THIS ID WITH FRIEND</p>
-        <div class="id-box">
-            <div id="my-id-display" class="id-text">CONNECTING...</div>
+    <!-- Create -->
+    <div id="create-screen" class="hidden">
+        <p style="font-size:12px; opacity:0.5; text-align:center; margin-bottom:10px;">YOUR BATTLE ID</p>
+        <div style="background:#050a14; padding:15px; border-radius:10px; border:2px dashed var(--primary); margin-bottom:20px; text-align:center;">
+            <span id="my-id" style="font-family:monospace; color:var(--primary); font-size:14px;">GENERATING...</span>
         </div>
-        <button class="btn btn-create" onclick="copyID()">COPY ID & WAIT</button>
-        <button onclick="location.reload()" style="background:none; border:none; color:grey; cursor:pointer; width:100%;">Cancel</button>
+        <button class="btn btn-main" onclick="copyID()">COPY ID & WAIT</button>
     </div>
 
-    <!-- JOIN SCREEN -->
-    <div id="join-screen" class="section hidden">
-        <input type="text" id="input-id" placeholder="PASTE ROOM ID HERE">
-        <button class="btn btn-create" onclick="joinRoom()">JOIN BATTLE</button>
-        <button onclick="location.reload()" style="background:none; border:none; color:grey; cursor:pointer; width:100%;">Back</button>
+    <!-- Join -->
+    <div id="join-screen" class="hidden">
+        <input type="text" id="target-id" placeholder="PASTE BATTLE ID HERE">
+        <button class="btn btn-main" onclick="joinBattle()">ENTER ARENA</button>
     </div>
 
-    <!-- GAME SCREEN -->
-    <div id="game-screen" class="section hidden">
-        <div class="game-header">
+    <!-- Game -->
+    <div id="game-screen" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <div id="status-pill" class="status-pill">WAITING...</div>
-            <button class="mic-btn active" id="mic-toggle" onclick="toggleMic()">🎤</button>
+            <div class="mic-container" id="mic-box">
+                <div class="visualizer"></div>
+                <button class="mic-btn active" id="mic-toggle" onclick="toggleMic()">🎤</button>
+            </div>
         </div>
-        <svg class="board-svg" viewBox="0 0 300 300" id="svg-board">
+        <svg class="board-svg" viewBox="0 0 300 300">
             <line class="line" x1="50" y1="50" x2="250" y2="50" /><line class="line" x1="50" y1="250" x2="250" y2="250" />
             <line class="line" x1="50" y1="50" x2="50" y2="250" /><line class="line" x1="250" y1="50" x2="250" y2="250" />
             <line class="line" x1="150" y1="50" x2="150" y2="250" /><line class="line" x1="50" y1="150" x2="250" y2="150" />
@@ -102,40 +110,60 @@
         </svg>
     </div>
 
-    <!-- RESULT OVERLAY -->
+    <!-- Winner Overlay -->
     <div id="result-overlay" class="hidden">
-        <div id="result-title" class="result-title">VICTORY!</div>
-        <div id="result-msg" class="result-msg">You outsmarted your opponent.</div>
-        <button class="btn btn-create" onclick="location.reload()">PLAY AGAIN</button>
+        <div id="result-title" class="result-banner">VICTORY</div>
+        <p id="result-desc" style="opacity:0.8; margin-bottom:30px;">Strategy Masterminds!</p>
+        <button class="btn btn-main" style="width:200px;" onclick="location.reload()">REMATCH</button>
     </div>
 </div>
 
 <audio id="remote-audio" autoplay></audio>
 
 <script>
-    const positions = [{x:50,y:50},{x:150,y:50},{x:250,y:50},{x:50,y:150},{x:150,y:150},{x:250,y:150},{x:50,y:250},{x:150,y:250},{x:250,y:250}];
+    const pos = [{x:50,y:50},{x:150,y:50},{x:250,y:50},{x:50,y:150},{x:150,y:150},{x:250,y:150},{x:50,y:250},{x:150,y:250},{x:250,y:250}];
     const adj = {0:[1,3,4],1:[0,2,4],2:[1,5,4],3:[0,4,6],4:[0,1,2,3,5,6,7,8],5:[2,4,8],6:[3,7,4],7:[6,8,4],8:[5,7,4]};
     const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-    let peer, conn, myRole, localStream, micEnabled = true;
+    let peer, conn, myRole, localStream, micOn = true;
     let state = { board: Array(9).fill(null), phase: 'placing', turn: 'p1', p1: 0, p2: 0, winner: null };
-    let selectedNode = null;
+    let sel = null;
 
     peer = new Peer();
-    peer.on('open', id => document.getElementById('my-id-display').innerText = id);
+    peer.on('open', id => document.getElementById('my-id').innerText = id);
 
-    // Host Answer Call
+    // Mic Visualizer Logic
+    function startMicVisualizer(stream) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function update() {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for(let i=0; i<bufferLength; i++) sum += dataArray[i];
+            let average = sum / bufferLength;
+            const micBox = document.getElementById('mic-box');
+            if(average > 30) micBox.classList.add('speaking');
+            else micBox.classList.remove('speaking');
+            requestAnimationFrame(update);
+        }
+        update();
+    }
+
     peer.on('call', call => {
-        navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-            localStream = stream;
-            call.answer(stream);
+        navigator.mediaDevices.getUserMedia({audio:true}).then(s => {
+            localStream = s; startMicVisualizer(s);
+            call.answer(s);
             call.on('stream', rs => document.getElementById('remote-audio').srcObject = rs);
         });
     });
 
-    peer.on('connection', c => {
-        conn = c; myRole = 'p1'; setupComm();
-    });
+    peer.on('connection', c => { conn = c; myRole = 'p1'; setupComm(); });
 
     function showCreate() {
         document.getElementById('menu-screen').classList.add('hidden');
@@ -147,64 +175,52 @@
         document.getElementById('join-screen').classList.remove('hidden');
     }
 
-    function joinRoom() {
-        const id = document.getElementById('input-id').value.trim();
+    function joinBattle() {
+        const id = document.getElementById('target-id').value.trim();
         if(!id) return;
-        conn = peer.connect(id);
-        myRole = 'p2';
-        
-        // Start Voice Call to Host
-        navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-            localStream = stream;
-            const call = peer.call(id, stream);
+        conn = peer.connect(id); myRole = 'p2';
+        navigator.mediaDevices.getUserMedia({audio:true}).then(s => {
+            localStream = s; startMicVisualizer(s);
+            const call = peer.call(id, s);
             call.on('stream', rs => document.getElementById('remote-audio').srcObject = rs);
         });
-        
         setupComm();
     }
 
     function setupComm() {
         conn.on('open', () => {
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.section, #menu-screen, #create-screen, #join-screen').forEach(el => el.classList.add('hidden'));
             document.getElementById('game-screen').classList.remove('hidden');
-            document.getElementById('app-title').classList.add('hidden');
             if(myRole === 'p1') sync();
             render();
         });
         conn.on('data', d => {
             state = d; render();
-            if(state.winner) showFinalResult(state.winner);
+            if(state.winner) showResult(state.winner);
         });
     }
 
-    function tapNode(i) {
+    function tap(i) {
         if(state.turn !== myRole || state.winner) return;
-
         if(state.phase === 'placing') {
             if(!state.board[i]) {
                 state.board[i] = myRole;
                 myRole === 'p1' ? state.p1++ : state.p2++;
                 if(state.p1 === 3 && state.p2 === 3) state.phase = 'moving';
-                checkWinner();
-                state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
+                checkWin(); state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
                 sync(); render();
             }
         } else {
-            if(state.board[i] === myRole) {
-                selectedNode = (selectedNode === i) ? null : i;
-                render();
-            } else if(selectedNode !== null && !state.board[i] && adj[selectedNode].includes(i)) {
-                state.board[i] = myRole;
-                state.board[selectedNode] = null;
-                selectedNode = null;
-                checkWinner();
-                state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
+            if(state.board[i] === myRole) { sel = (sel === i) ? null : i; render(); }
+            else if(sel !== null && !state.board[i] && adj[sel].includes(i)) {
+                state.board[i] = myRole; state.board[sel] = null; sel = null;
+                checkWin(); state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
                 sync(); render();
             }
         }
     }
 
-    function checkWinner() {
+    function checkWin() {
         wins.forEach(w => {
             if(state.board[w[0]] && state.board[w[0]] === state.board[w[1]] && state.board[w[0]] === state.board[w[2]]) {
                 state.winner = state.board[w[0]];
@@ -217,62 +233,46 @@
     function render() {
         const layer = document.getElementById('nodes-layer');
         layer.innerHTML = "";
-        positions.forEach((p, i) => {
+        pos.forEach((p, i) => {
             const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 16);
             c.classList.add("node");
             if(state.board[i] === 'p1') c.classList.add("p1");
             if(state.board[i] === 'p2') c.classList.add("p2");
-            if(selectedNode === i) c.classList.add("selected");
-            c.onclick = () => tapNode(i);
+            if(sel === i) c.classList.add("selected");
+            c.onclick = () => tap(i);
             layer.appendChild(c);
-
-            if(selectedNode !== null && !state.board[i] && adj[selectedNode].includes(i)) {
-                const h = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                h.setAttribute("cx", p.x); h.setAttribute("cy", p.y); h.setAttribute("r", 8);
-                h.classList.add("hint");
-                h.onclick = () => tapNode(i);
-                layer.appendChild(h);
-            }
         });
-
         const pill = document.getElementById('status-pill');
-        pill.innerText = (state.turn === myRole) ? "YOUR TURN" : "ENEMY TURN";
-        pill.style.background = (state.turn === 'p1') ? 'var(--p1)' : 'var(--p2)';
+        pill.innerText = (state.turn === myRole) ? "YOUR ATTACK" : "ENEMY ATTACK";
+        pill.style.color = (state.turn === 'p1') ? 'var(--p1)' : 'var(--p2)';
     }
 
-    function showFinalResult(winner) {
+    function showResult(winner) {
         const overlay = document.getElementById('result-overlay');
         const title = document.getElementById('result-title');
-        const msg = document.getElementById('result-msg');
         overlay.classList.remove('hidden');
-        
         if(winner === myRole) {
-            title.innerText = "VICTORY!";
-            title.style.color = "var(--p1)";
-            msg.innerText = "Congratulations! You are the Strategy Master.";
+            title.innerText = "VICTORY"; title.className = "result-banner victory-text";
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         } else {
-            title.innerText = "DEFEAT!";
-            title.style.color = "var(--p2)";
-            msg.innerText = "Don't give up. Try a different strategy next time!";
+            title.innerText = "DEFEAT"; title.className = "result-banner defeat-text";
         }
     }
 
     function toggleMic() {
-        micEnabled = !micEnabled;
-        const btn = document.getElementById('mic-toggle');
+        micOn = !micOn;
         if(localStream) {
-            localStream.getAudioTracks()[0].enabled = micEnabled;
-            btn.classList.toggle('active', micEnabled);
-            btn.classList.toggle('muted', !micEnabled);
-            btn.innerText = micEnabled ? "🎤" : "🔇";
+            localStream.getAudioTracks()[0].enabled = micOn;
+            const btn = document.getElementById('mic-toggle');
+            btn.className = micOn ? "mic-btn active" : "mic-btn muted";
+            btn.innerText = micOn ? "🎤" : "🔇";
         }
     }
 
     function copyID() {
-        const id = document.getElementById('my-id-display').innerText;
-        navigator.clipboard.writeText(id);
-        alert("ID Copied! Wait here for friend to join.");
+        const id = document.getElementById('my-id').innerText;
+        navigator.clipboard.writeText(id); alert("BATTLE ID COPIED!");
     }
 </script>
 </body>
