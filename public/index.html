@@ -16,103 +16,86 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        body {
-            background-color: var(--bg);
-            color: white; display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; overflow: hidden;
-        }
+        body { background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
-        .container {
-            width: 90%; max-width: 400px;
-            background: var(--card); border-radius: 24px;
-            padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
+        .container { width: 90%; max-width: 400px; background: var(--card); border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
         h1 { font-family: 'Orbitron', sans-serif; font-size: 22px; margin-bottom: 30px; color: var(--primary); }
 
-        /* Main Menu Buttons */
-        .menu-btns { display: flex; flex-direction: column; gap: 15px; }
-        .btn {
-            padding: 16px; border-radius: 12px; border: none;
-            font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-        .btn-create { background: var(--primary); color: white; }
-        .btn-join { background: #334155; color: white; border: 1px solid var(--primary); }
-
-        /* Screen Sections */
         .hidden { display: none; }
         .section { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Create Room UI */
-        .id-box {
-            background: #0f172a; padding: 15px; border-radius: 10px;
-            border: 1px dashed var(--primary); margin: 20px 0;
-        }
-        .id-text { font-family: monospace; font-size: 20px; color: var(--primary); word-break: break-all; }
+        /* Menu Buttons */
+        .menu-btns { display: flex; flex-direction: column; gap: 15px; }
+        .btn { padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; }
+        .btn-create { background: var(--primary); color: white; }
+        .btn-join { background: #334155; color: white; border: 1px solid var(--primary); }
 
-        /* Join Room UI */
-        input {
-            width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #475569;
-            background: #0f172a; color: white; font-size: 16px; margin-bottom: 15px; text-align: center;
-        }
+        /* ID Display */
+        .id-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px dashed var(--primary); margin: 20px 0; }
+        .id-text { font-family: monospace; font-size: 16px; color: var(--primary); word-break: break-all; }
+
+        input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; margin-bottom: 15px; text-align: center; outline: none; }
 
         /* Game Board */
-        .game-status { font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 8px; }
-        .board-svg { width: 100%; background: #0f172a; border-radius: 15px; }
+        .game-status { font-weight: bold; margin-bottom: 15px; padding: 10px; border-radius: 8px; font-size: 14px; }
+        .board-svg { width: 100%; background: #0f172a; border-radius: 15px; touch-action: none; }
         .line { stroke: #334155; stroke-width: 3; }
         .node { fill: #1e293b; stroke: #475569; stroke-width: 2; cursor: pointer; }
         .p1 { fill: var(--p1) !important; stroke: #fff !important; filter: drop-shadow(0 0 5px var(--p1)); }
         .p2 { fill: var(--p2) !important; stroke: #fff !important; filter: drop-shadow(0 0 5px var(--p2)); }
         .selected { stroke: #fbbf24 !important; stroke-width: 4; r: 18; }
-        .hint { fill: var(--primary); opacity: 0.5; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.1; } }
+        .hint { fill: var(--primary); opacity: 0.5; }
 
-        .back-btn { margin-top: 20px; background: none; border: none; color: #94a3b8; cursor: pointer; text-decoration: underline; }
+        .back-btn { margin-top: 20px; background: none; border: none; color: #94a3b8; cursor: pointer; text-decoration: underline; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>STRATEGY LINE</h1>
+    <h1 id="main-title">STRATEGY LINE</h1>
 
     <!-- 1. MAIN MENU -->
-    <div id="menu-screen" class="section menu-btns">
-        <button class="btn btn-create" onclick="showCreateScreen()">CREATE ROOM</button>
-        <button class="btn btn-join" onclick="showJoinScreen()">JOIN ROOM</button>
+    <div id="menu-screen" class="section">
+        <div class="menu-btns">
+            <button class="btn btn-create" onclick="showCreateScreen()">CREATE ROOM</button>
+            <button class="btn btn-join" onclick="showJoinScreen()">JOIN ROOM</button>
+        </div>
     </div>
 
     <!-- 2. CREATE SCREEN -->
     <div id="create-screen" class="section hidden">
-        <p>Share this ID with your friend:</p>
+        <p>Send this ID to your friend:</p>
         <div class="id-box">
-            <div id="my-id-display" class="id-text">Generating...</div>
+            <div id="my-id-display" class="id-text">Loading ID...</div>
         </div>
-        <button class="btn btn-create" onclick="copyID()">COPY ID</button>
-        <p style="margin-top: 15px; font-size: 14px; color: #94a3b8;">Waiting for opponent to join...</p>
-        <button class="back-btn" onclick="goBack()">Back to Menu</button>
+        <button class="btn btn-create" onclick="copyID()">COPY ROOM ID</button>
+        <p id="wait-msg" style="margin-top: 15px; font-size: 13px; color: #94a3b8;">Waiting for friend to join...</p>
+        <button class="back-btn" onclick="goBack()">Cancel</button>
     </div>
 
     <!-- 3. JOIN SCREEN -->
     <div id="join-screen" class="section hidden">
-        <input type="text" id="input-id" placeholder="Paste Room ID here">
-        <button class="btn btn-create" style="width: 100%" onclick="joinRoom()">JOIN NOW</button>
-        <button class="back-btn" onclick="goBack()">Back to Menu</button>
+        <input type="text" id="input-id" placeholder="Paste Friend's ID here">
+        <button class="btn btn-create" onclick="joinRoom()">START GAME</button>
+        <button class="back-btn" onclick="goBack()">Back</button>
     </div>
 
     <!-- 4. GAME SCREEN -->
     <div id="game-screen" class="section hidden">
-        <div id="status-msg" class="game-status">Connected!</div>
-        <svg class="board-svg" viewBox="0 0 300 300">
-            <line class="line" x1="50" y1="50" x2="250" y2="50" /><line class="line" x1="50" y1="250" x2="250" y2="250" />
-            <line class="line" x1="50" y1="50" x2="50" y2="250" /><line class="line" x1="250" y1="50" x2="250" y2="250" />
-            <line class="line" x1="150" y1="50" x2="150" y2="250" /><line class="line" x1="50" y1="150" x2="250" y2="150" />
-            <line class="line" x1="50" y1="50" x2="250" y2="250" /><line class="line" x1="250" y1="50" x2="50" y2="250" />
+        <div id="status-msg" class="game-status">Connecting...</div>
+        <svg class="board-svg" viewBox="0 0 300 300" id="game-board">
+            <line class="line" x1="50" y1="50" x2="250" y2="50" />
+            <line class="line" x1="50" y1="250" x2="250" y2="250" />
+            <line class="line" x1="50" y1="50" x2="50" y2="250" />
+            <line class="line" x1="250" y1="50" x2="250" y2="250" />
+            <line class="line" x1="150" y1="50" x2="150" y2="250" />
+            <line class="line" x1="50" y1="150" x2="250" y2="150" />
+            <line class="line" x1="50" y1="50" x2="250" y2="250" />
+            <line class="line" x1="250" y1="50" x2="50" y2="250" />
             <g id="board-nodes"></g>
         </svg>
-        <button class="back-btn" onclick="location.reload()">Exit Game</button>
+        <button class="back-btn" onclick="location.reload()">Quit Game</button>
     </div>
 </div>
 
@@ -122,21 +105,25 @@
     const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
     let peer, conn, myRole;
-    let state = { board: Array(9).fill(null), phase: 'placing', turn: 'p1', p1P: 0, p2P: 0, active: false };
+    let state = { board: Array(9).fill(null), phase: 'placing', turn: 'p1', p1P: 0, p2P: 0, active: false, winner: null };
     let selected = null;
 
-    // Initialize PeerJS
+    // Initialize Peer
     peer = new Peer();
-    peer.on('open', id => document.getElementById('my-id-display').innerText = id);
+    peer.on('open', id => {
+        document.getElementById('my-id-display').innerText = id;
+    });
 
-    // MENU NAVIGATION
+    // LISTEN FOR INCOMING CONNECTIONS (For Host)
+    peer.on('connection', c => {
+        conn = c;
+        myRole = 'p1';
+        setupEvents();
+    });
+
     function showCreateScreen() {
         document.getElementById('menu-screen').classList.add('hidden');
         document.getElementById('create-screen').classList.remove('hidden');
-        // Host waits for connection
-        peer.on('connection', c => {
-            conn = c; myRole = 'p1'; setupGame();
-        });
     }
 
     function showJoinScreen() {
@@ -145,23 +132,24 @@
     }
 
     function goBack() {
-        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-        document.getElementById('menu-screen').classList.remove('hidden');
+        location.reload(); 
     }
 
+    // JOINING A ROOM (For Joiner)
     function joinRoom() {
-        const id = document.getElementById('input-id').value;
-        if (!id) return alert("Please enter a Room ID");
+        const id = document.getElementById('input-id').value.trim();
+        if (!id) return alert("Please paste an ID");
         conn = peer.connect(id);
         myRole = 'p2';
-        setupGame();
+        setupEvents();
     }
 
-    function setupGame() {
+    function setupEvents() {
         conn.on('open', () => {
             state.active = true;
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('main-title').classList.add('hidden');
             if (myRole === 'p1') sync();
             render();
         });
@@ -170,12 +158,16 @@
             state = data;
             render();
             if (state.winner) {
-                setTimeout(() => alert(state.winner === myRole ? "CONGRATS! YOU WON! 🏆" : "GAME OVER! YOU LOST! 💀"), 200);
+                setTimeout(() => alert(state.winner === myRole ? "YOU WON! 🏆" : "YOU LOST! 💀"), 300);
             }
+        });
+
+        conn.on('close', () => {
+            alert("Opponent disconnected.");
+            location.reload();
         });
     }
 
-    // GAMEPLAY LOGIC
     function tapNode(i) {
         if (!state.active || state.turn !== myRole || state.winner) return;
 
@@ -184,7 +176,10 @@
                 state.board[i] = myRole;
                 myRole === 'p1' ? state.p1P++ : state.p2P++;
                 if (state.p1P === 3 && state.p2P === 3) state.phase = 'moving';
-                finishTurn();
+                checkWin();
+                state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
+                sync();
+                render();
             }
         } else {
             if (state.board[i] === myRole) {
@@ -194,24 +189,25 @@
                 state.board[i] = myRole;
                 state.board[selected] = null;
                 selected = null;
-                finishTurn();
+                checkWin();
+                state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
+                sync();
+                render();
             }
         }
     }
 
-    function finishTurn() {
-        // Check for Winner
+    function checkWin() {
         wins.forEach(w => {
             if (state.board[w[0]] && state.board[w[0]] === state.board[w[1]] && state.board[w[0]] === state.board[w[2]]) {
                 state.winner = state.board[w[0]];
             }
         });
-        state.turn = (state.turn === 'p1') ? 'p2' : 'p1';
-        sync();
-        render();
     }
 
-    function sync() { if (conn && conn.open) conn.send(state); }
+    function sync() {
+        if (conn && conn.open) conn.send(state);
+    }
 
     function render() {
         const g = document.getElementById('board-nodes');
@@ -226,30 +222,30 @@
             c.onclick = () => tapNode(i);
             g.appendChild(c);
 
-            // Show move hints
             if (selected !== null && !state.board[i] && adj[selected].includes(i)) {
-                const hint = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                hint.setAttribute("cx", p.x); hint.setAttribute("cy", p.y); hint.setAttribute("r", 8);
-                hint.classList.add("hint");
-                hint.onclick = () => tapNode(i);
-                g.appendChild(hint);
+                const h = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                h.setAttribute("cx", p.x); h.setAttribute("cy", p.y); h.setAttribute("r", 8);
+                h.classList.add("hint");
+                h.onclick = () => tapNode(i);
+                g.appendChild(h);
             }
         });
 
-        const msg = document.getElementById('status-msg');
-        if (state.winner) {
-            msg.innerText = "GAME OVER";
-            msg.style.background = "#475569";
+        const m = document.getElementById('status-msg');
+        if(state.winner) {
+            m.innerText = "GAME OVER";
+            m.style.background = "#334155";
         } else {
-            msg.innerText = (state.turn === myRole) ? "YOUR TURN" : "OPPONENT'S TURN";
-            msg.style.background = (state.turn === 'p1') ? 'var(--p1)' : 'var(--p2)';
+            m.innerText = (state.turn === myRole) ? "YOUR TURN 🎯" : "WAITING FOR OPPONENT... ⌛";
+            m.style.background = (state.turn === 'p1') ? 'var(--p1)' : 'var(--p2)';
         }
     }
 
     function copyID() {
         const id = document.getElementById('my-id-display').innerText;
+        if(id === "Loading ID...") return;
         navigator.clipboard.writeText(id);
-        alert("Room ID Copied!");
+        alert("ID Copied!");
     }
 </script>
 </body>
